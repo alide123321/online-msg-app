@@ -62,19 +62,21 @@ io.on("connection", (socket) => {
         "message",
         formatMessage(botName, allmsgs.get(`allmsgs_${user.room}`))
       );
+      return;
     }
 
     //save new msgs
-    if (allmsgs.has(`allmsgs_${user.room}`)) {
-      allmsgs.set(`allmsgs_${user.room}`, `___________`);
+    if (!allmsgs.has(`allmsgs_${user.room}`)) {
+      allmsgs.set(`allmsgs_${user.room}`, `${user.username} sent: ${msg} \n`);
+      return;
     }
 
-    var oldmsgs = allmsgs.get(`allmsgs_${user.room}`);
+    var msgs = allmsgs.get(`allmsgs_${user.room}`);
     allmsgs.delete(`allmsgs_${user.room}`);
 
-    var newallmsgs = oldmsgs.concat(`\n ${user.username}sent: ${msg} \n`);
+     msgs = msgs.concat(`\n ${user.username} sent: ${msg} \n`);
 
-    allmsgs.set(`allmsgs_${user.room}`, newallmsgs);
+    allmsgs.set(`allmsgs_${user.room}`, msgs);
   });
 
   // Runs when client disconnects
