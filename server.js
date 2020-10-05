@@ -14,6 +14,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+const db = require('quick.db');
+var allmsgs = new db.table('allmsgs')
+
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -49,6 +52,27 @@ io.on('connection', socket => {
     const user = getCurrentUser(socket.id);
 
     io.to(user.room).emit('message', formatMessage(user.username, msg));
+
+    if(user.username === botName){
+      return;
+    }
+
+    if(msg === ".logs"){
+      io.to(user.room).emit('message', formatMessage(botName, allmsgs.get(`allmsgs_${user.room}`));
+    }
+
+
+    //save new msgs
+    if(allmsgs.has(`allmsgs_${user.room}`)){
+      allmsgs.set(`allmsgs_${user.room}`, ``)
+    }
+
+    var oldmsgs = allmsgs.get(`allmsgs_${user.room}`)
+    await allmsgs.delete(`warnings_${msg.guild.id}_${mentioned.id}`);
+
+    var newallmsgs = oldmsgs.concat(`\n ${user.username}sent: ${msg} \n`);
+
+    allmsgs.set(`allmsgs_${user.room}`,newallmsgs)
   });
 
   // Runs when client disconnects
